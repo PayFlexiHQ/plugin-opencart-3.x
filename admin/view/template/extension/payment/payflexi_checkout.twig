@@ -1,0 +1,290 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+				<button type="submit" form="form-pp-std-uk" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button> <a href="{{ cancel }}" data-toggle="tooltip" title="{{button_cancel}}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+			</div>
+			<h1>
+{{ heading_title }}
+			</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %} 
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %} 
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %} 
+		<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %} 
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<i class="fa fa-pencil"></i> 
+					{{ text_edit }}
+				</h3>
+			</div>
+			<div class="panel-body">
+				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-pp-std-uk" class="form-horizontal">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}
+						</a></li>
+						<li><a href="#tab-status" data-toggle="tab">{{ tab_order_status }}
+						</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tab-general">
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="entry-payment-gateway"><span data-toggle="tooltip" title="{{ help_payment_gateway }}">{{ entry_payment_gateway }}
+								</label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_gateway_id" id="input-order-status" class="form-control">
+										{% for payflexi_gateway in payment_payflexi_checkout_gateways %}
+										{% if  payflexi_gateway.code == payment_payflexi_checkout_gateway_id %}
+										<option value="{{ payflexi_gateway.code }}" selected="selected">{{ payflexi_gateway.name }}</option>
+										{% else %}
+										<option value="{{ payflexi_gateway.code }}">{{ payflexi_gateway.name }}</option>
+										{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-webhook-url"><span data-toggle="tooltip" title="{{ help_webhook_url }}">{{ entry_webhook_url }}</span></label>
+								<div class="col-sm-10">
+									<div class="input-group"><span class="input-group-addon"><i class="fa fa-link"></i></span>
+									<input type="text" readonly value="{{ payment_payflexi_checkout_webhook_url }}" id="input-webhook-url" class="form-control" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group required">
+								<label class="col-sm-2 control-label" for="entry-test-secret">{{ entry_test_secret }}
+								</label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_test_secret" value="{{ payment_payflexi_checkout_test_secret }}" placeholder="{{ entry_test_secret }}" id="entry-test-secret" class="form-control" />
+
+									{% if not payment_payflexi_checkout_live and error_keys %}
+									<div class="text-danger">
+									{{ error_keys }}
+									</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="form-group required">
+								<label class="col-sm-2 control-label" for="entry-test-public">{{ entry_test_public }}
+								</label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_test_public" value="{{ payment_payflexi_checkout_test_public }}" placeholder="{{ entry_test_public }}" id="entry-test-public" class="form-control" />
+
+									{% if (not payment_payflexi_checkout_live and error_keys) %}
+									<div class="text-danger">
+									{{ error_keys }}
+									</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-live-demo"><span data-toggle="tooltip" title="{{ help_live }}">{{ entry_live }}
+								</span></label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_live" id="input-live-demo" class="form-control">
+										<option value="1" {{ payment_payflexi_checkout_live ? 'selected="selected"':'' }}> {{ text_yes }}
+										</option>
+										<option value="0" {{ payment_payflexi_checkout_live ? '':'selected="selected"' }}> {{ text_no }}
+										</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="entry-live-secret">{{entry_live_secret }}
+								</label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_live_secret" value="{{ payment_payflexi_checkout_live_secret }}" placeholder="{{ entry_live_secret }}" id="entry-live-secret" class="form-control" />
+
+									{% if (payment_payflexi_checkout_live and error_keys) %}
+									<div class="text-danger">
+									{{ error_keys }}
+									</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="entry-live-public"> {{ entry_live_public }}
+								</label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_live_public" value="{{ payment_payflexi_checkout_live_public }}" placeholder="{{ entry_live_public }}" id="entry-live-public" class="form-control" />
+
+									{% if (payment_payflexi_checkout_live and error_keys) %}
+									<div class="text-danger">
+									{{ error_keys }}
+									</div>
+									{% endif %}
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-debug"><span data-toggle="tooltip" title="{{ help_debug }}"> {{ entry_debug }}
+								</span></label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_debug" id="input-debug" class="form-control">
+										{% if payment_payflexi_checkout_debug %}
+										<option value="1" selected="selected"> {{ text_enabled }}
+										</option>
+										<option value="0"> {{ text_disabled }}
+										</option>
+										{% else %}
+										<option value="1"> {{ text_enabled }}
+										</option>
+										<option value="0" selected="selected"> {{ text_disabled }}
+										</option>
+										{% endif %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-total"><span data-toggle="tooltip" title="{{ help_total }}"> {{ entry_total }}
+								</span></label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_total" value="{{ payment_payflexi_checkout_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-sort-order">
+								{{ entry_sort_order }}
+								</label> 
+								<div class="col-sm-10">
+									<input type="text" name="payment_payflexi_checkout_sort_order" value="{{ payment_payflexi_checkout_sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-geo-zone">
+								{{ entry_geo_zone }}
+								</label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_geo_zone_id" id="input-geo-zone" class="form-control">
+										<option value="0">
+										{{ text_all_zones }}
+										</option>
+										{% for geo_zones in geo_zone %}
+										{% if geo_zone.geo_zone_id == payment_payflexi_checkout_geo_zone_id %}
+										<option value="{{ geo_zone.geo_zone_id }}" selected="selected">{{ geo_zone.name }}
+										</option>
+										{% else %}
+										<option value="{{ geo_zone.geo_zone_id }}">{{ geo_zone.name }}
+										</option>
+										{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-status">{{ entry_status }}
+								</label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_status" id="input-status" class="form-control">
+
+								{% if payment_payflexi_checkout_status %}
+										<option value="1" selected="selected">{{ text_enabled }}
+										</option>
+										<option value="0">{{ text_disabled }}
+										</option>
+								{% else %}
+										<option value="1">{{ text_enabled }}
+										</option>
+										<option value="0" selected="selected">{{ text_disabled }}
+										</option>
+								{% endif %}
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane" id="tab-status">
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-order-status">{{ entry_order_status }}
+								</label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_order_status_id" id="input-order-status" class="form-control">
+									{% for order_status in order_statuses %}
+										{% if order_status.order_status_id == payment_payflexi_checkout_order_status_id %}
+										<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+										{% else %}
+										<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+										{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-pending-status">{{ entry_pending_status }}
+								</label> 
+								<div class="col-sm-10">
+									<select name="payment_payflexi_checkout_pending_status_id" id="input-pending-status" class="form-control">
+										{% for order_status in order_statuses %}
+										{% if order_status.order_status_id == payment_payflexi_checkout_pending_status_id %}
+										<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+										{% else %}
+										<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+										{% endif %}
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-completed-status">{{ entry_completed_status }}</label>
+								<div class="col-sm-10">
+								<select name="payment_payflexi_checkout_completed_status_id" id="input-completed-status" class="form-control">
+									{% for order_status in order_statuses %}
+									{% if order_status.order_status_id == payment_payflexi_checkout_completed_status_id %}
+									<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+									{% else %}
+									<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+									{% endif %}
+									{% endfor %}
+								</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-canceled-status">{{ entry_canceled_status }}</label>
+								<div class="col-sm-10">
+								<select name="payment_payflexi_checkout_canceled_status_id" id="input-canceled-status" class="form-control">
+									{% for order_status in order_statuses %}
+									{% if order_status.order_status_id == payment_payflexi_checkout_canceled_status_id %}
+									<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+									{% else %}
+									<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+									{% endif %}
+									{% endfor %}
+								</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="input-failed-status">{{ entry_failed_status }}</label>
+								<div class="col-sm-10">
+								<select name="payment_payflexi_checkout_failed_status_id" id="input-failed-status" class="form-control">
+									{% for order_status in order_statuses %}
+									{% if order_status.order_status_id == payment_payflexi_checkout_failed_status_id %}
+									<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+									{% else %}
+									<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+									{% endif %}
+									{% endfor %}
+								</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div style="color:#222222;text-align:center;">
+			<a href="https://www.payflexi.co" target="_blank">{{ heading_title }}
+			v1.0.0</a>
+		</div>
+	</div>
+</div>
+
+{{ footer }}
