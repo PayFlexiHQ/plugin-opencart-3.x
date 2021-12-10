@@ -96,6 +96,75 @@ class ModelExtensionPaymentPayflexiCheckout extends Model
         `status` = '" . $this->db->escape($order_data['status']) . "' WHERE `order_id` = '" . (int)$order_id . "'");
 	}
 
+	public function getData($url)
+    {
+		if ($this->config->get('payment_payflexi_checkout_live')) {
+            $secret_key = $this->config->get('payment_payflexi_checkout_live_secret');
+        } else {
+            $secret_key = $this->config->get('payment_payflexi_checkout_test_secret');
+        }
+
+        $header = array();
+
+		$header[] = 'Content-type: application/json';
+        $header[] = 'Accept: application/json';
+		$header[] = 'Authorization: Bearer ' . $secret_key;
+
+        $curl = curl_init($url);
+
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+
+        $response = curl_exec($curl);
+		
+        if (empty($response)) {
+            $debug = array(
+                'curl_getinfo' => curl_getinfo($curl),
+                'curl_errno' => curl_errno($curl),
+                'curl_error' => curl_error($curl)
+            );
+
+            curl_close($curl);
+
+            $this->debugLog("ERROR", $debug);
+
+            throw new \RuntimeException($this->language->get('error_api'));
+        } else {
+            $this->debugLog("SUCCESS", $response);
+        }
+
+        curl_close($curl);
+
+        return json_decode($response, true);
+    
+    }
+
+
+    public function debugLog($type, $data) {
+        if (!$this->config->get('payment_payflexi_checkout_debug')) {
+            return;
+        }
+
+        if (is_array($data)) {
+            $message = json_encode($data);
+        } else {
+            $message = $data;
+        }
+
+        ob_start();
+            debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            $message .= PHP_EOL . ob_get_contents();
+        ob_end_clean();
+
+        $log = new \Log(self::LOG_FILENAME);
+
+        $log->write($type . " ---> " . $message);
+
+        unset($log);
+    }
+
     public function log($data) {
 		if ($this->config->get('payment_payflexi_checkout_debug')) {
 			$log = new Log('payflexi_checkout_debug.log');

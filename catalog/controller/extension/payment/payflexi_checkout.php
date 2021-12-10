@@ -72,37 +72,6 @@ class ControllerExtensionPaymentPayflexiCheckout extends Controller
         return $this->load->view('extension/payment/payflexi_checkout', $data);
     }
 
-    private function query_api_transaction_verify($reference)
-    {
-        if ($this->config->get('payment_payflexi_checkout_live')) {
-            $skey = $this->config->get('payment_payflexi_checkout_live_secret');
-        } else {
-            $skey = $this->config->get('payment_payflexi_checkout_test_secret');
-        }
-
-        $context = stream_context_create(
-            array(
-                'http'=>array(
-                'method'=>"GET",
-                'header'=>"Authorization: Bearer " .  $skey,
-                'user-agent'=>"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
-                )
-            )
-        );
-        $url = 'https://api.payflexi.co/merchants/transactions/'. rawurlencode($reference);
-        $request = file_get_contents($url, false, $context);
-        return json_decode($request, true);
-    }
-
-    private function redir_and_die($url, $onlymeta = false)
-    {
-        if (!headers_sent() && !$onlymeta) {
-            header('Location: ' . $url);
-        }
-        echo "<meta http-equiv=\"refresh\" content=\"0;url=" . addslashes($url) . "\" />";
-        die();
-    }
-
     public function callback()
     {
         if (isset($this->request->get['trxref'])) {
@@ -127,8 +96,10 @@ class ControllerExtensionPaymentPayflexiCheckout extends Controller
                     $this->log->write('PAYFLEXI CHECKOUT :: CALLBACK DATA: ' . print_r($this->request->get, true));
                 }
 
-                // Callback payflexi to get real transaction status
-                $payflexi_api_response = $this->query_api_transaction_verify($trxref);
+                $url = 'https://api.payflexi.co/merchants/transactions/'. rawurlencode($trxref);
+
+                 // Callback payflexi to get real transaction status
+                $payflexi_api_response = $this->model_extension_payment_payflexi_checkout->getData($url);
 
                 $order_status_id = $this->config->get('config_order_status_id');
 
@@ -144,6 +115,10 @@ class ControllerExtensionPaymentPayflexiCheckout extends Controller
                         $order_status_id = $this->config->get('payment_payflexi_checkout_order_status_id');
                     }
                     $redir_url = $this->url->link('checkout/success');
+                } elseif (array_key_exists('data', $payflexi_api_response) && array_key_exists('status', $payflexi_api_response['data']) && ($payflexi_api_response['data']['status'] === 'pending')) {
+                    $order_status_id = $this->config->get('payment_payflexi_checkout_pending_status_id');
+                    $redir_url = $this->url->link('checkout/success', '', 'SSL');
+                    $this->cart->clear();
                 } elseif (array_key_exists('data', $payflexi_api_response) && array_key_exists('status', $payflexi_api_response['data']) && ($payflexi_api_response['data']['status'] === 'failed')) {
                     $order_status_id = $this->config->get('payment_payflexi_checkout_declined_status_id');
                     $redir_url = $this->url->link('checkout/checkout', '', 'SSL');
@@ -176,7 +151,7 @@ class ControllerExtensionPaymentPayflexiCheckout extends Controller
 				);
 
                 $this->model_extension_payment_payflexi_checkout->addTransaction($payflexi_transaction_data);
-
+               
                 $this->redir_and_die($redir_url);
             }
         }
@@ -321,4 +296,14 @@ class ControllerExtensionPaymentPayflexiCheckout extends Controller
         exit;
        
     }
+
+    private function redir_and_die($url, $onlymeta = false)
+    {
+        if (!headers_sent() && !$onlymeta) {
+            header('Location: ' . $url);
+        }
+        echo "<meta http-equiv=\"refresh\" content=\"0;url=" . addslashes($url) . "\" />";
+        die();
+    }
+
 }

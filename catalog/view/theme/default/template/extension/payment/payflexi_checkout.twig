@@ -31,6 +31,9 @@
       onSuccess: function(response){
           window.location.href='{{callback}}'.replace('&amp;', '&').replace('&amp;', '&');
       },
+      onShared: function(response){
+          window.location.href='{{callback}}'.replace('&amp;', '&').replace('&amp;', '&');
+      },
       onExit: function(){
           window.location.href='{{cancel_return}}'.replace('&amp;', '&').replace('&amp;', '&');
       },
